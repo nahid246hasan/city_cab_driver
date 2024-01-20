@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:city_cab_driver/models/drivers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -13,3 +14,9 @@ Users? usersCurrentInfo;
 User? currentFirebaseUser;
 
 StreamSubscription<Position>? hometabPageStreamSubscription;
+
+StreamSubscription<Position>? rideStreamSubscription;
+
+Position? currentPosition;
+
+Drivers? driversInformation;

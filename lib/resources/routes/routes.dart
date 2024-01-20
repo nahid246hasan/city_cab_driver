@@ -1,5 +1,6 @@
 
 import 'package:city_cab_driver/resources/routes/routes_name.dart';
+import 'package:city_cab_driver/screens/new_ride_screen/new_ride_screen.dart';
 import 'package:get/get_navigation/src/routes/get_route.dart';
 import 'package:get/get_navigation/src/routes/transitions_type.dart';
 
@@ -45,5 +46,12 @@ class AppRoutes{
       transitionDuration: const Duration(milliseconds: 250),
       transition: Transition.leftToRight,
     ),
+
+    // GetPage(
+    //   name: RoutesName.newRideScreen,
+    //   page: () => NewRideScreen(rideDetails: null,),
+    //   transitionDuration: const Duration(milliseconds: 250),
+    //   transition: Transition.leftToRight,
+    // ),
   ];
 }

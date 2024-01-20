@@ -1,7 +1,11 @@
 import 'dart:async';
 
 import 'package:city_cab_driver/main.dart';
+import 'package:city_cab_driver/models/drivers.dart';
+import 'package:city_cab_driver/notifications/push_notifications_service.dart';
 import 'package:city_cab_driver/utils/utils.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
@@ -25,6 +29,12 @@ class _HomeTabPageState extends State<HomeTabPage> {
     target: LatLng(37.42796133580664, -122.085749655962),
     zoom: 14,
   );
+  @override
+  void initState() {
+    // TODO: implement initState
+    getCurrentDriverInfo();
+    super.initState();
+  }
 
   String driverStatusText="Offline Now - Go Online";
   Color driverStatusColor=Colors.black;
@@ -35,7 +45,6 @@ class _HomeTabPageState extends State<HomeTabPage> {
   final Completer<GoogleMapController> _controllerGoogleMap =
       Completer<GoogleMapController>();
 
-  Position? currentPosition;
 
   void locatePosition() async {
     bool serviceEnabled;
@@ -84,6 +93,20 @@ class _HomeTabPageState extends State<HomeTabPage> {
     // if (kDebugMode) {
     //   print("This is your Address :: $address");
     // }
+  }
+
+  void getCurrentDriverInfo() async{
+    currentFirebaseUser= await FirebaseAuth.instance.currentUser;
+    driversRef.child(currentFirebaseUser!.uid).once().then((DatabaseEvent event){
+      DataSnapshot? dataSnapshot = event.snapshot;
+      if(dataSnapshot.value!=null){
+        driversInformation=Drivers.fromSnapshot(dataSnapshot);
+
+      }
+    });
+    PushNotificationsService pushNotificationsService=PushNotificationsService();
+    pushNotificationsService.initialize(context);
+    pushNotificationsService.getToken();
   }
 
   @override
@@ -190,6 +213,7 @@ class _HomeTabPageState extends State<HomeTabPage> {
       print("//////////////////////////////////////////");
       Geofire.setLocation("${currentFirebaseUser?.uid}", currentPosition!.latitude, currentPosition!.longitude);
 
+      rideRequestRef.set("searching");
       rideRequestRef.onValue.listen((event) {
 
       });

@@ -4,6 +4,7 @@ import 'package:city_cab_driver/resources/assistant/request_assistant.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -15,31 +16,31 @@ import '../../models/direction_details.dart';
 import '../../provider/app_data.dart';
 
 class AssistantMethods {
-  Future<String> searchCoordinateAddress(
-      Position position, BuildContext context) async {
-    String placeAddress = "";
-    String url =
-        "https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=$mapKey";
-    String st1, st2, st3, st4;
-
-    var response = await RequestAssistant.getRequest(url);
-
-    if (response != "failed") {
-      //placeAddress=response["results"][0]["formatted_address"];
-      st1 = response["results"][0]["address_components"][3]["long_name"];
-      st2 = response["results"][0]["address_components"][4]["long_name"];
-      st3 = response["results"][0]["address_components"][5]["long_name"];
-      st4 = response["results"][0]["address_components"][6]["long_name"];
-      placeAddress = st1 + ", " + st2 + ", " + st3 + ", " + st4;
-
-      Address address =
-          Address("", placeAddress, "", position.latitude, position.longitude);
-      Provider.of<AppData>(context, listen: false)
-          .updatePickupLocationAddress(address);
-    }
-
-    return placeAddress;
-  }
+  // Future<String> searchCoordinateAddress(
+  //     Position position, BuildContext context) async {
+  //   String placeAddress = "";
+  //   String url =
+  //       "https://maps.googleapis.com/maps/api/geocode/json?latlng=${position.latitude},${position.longitude}&key=$mapKey";
+  //   String st1, st2, st3, st4;
+  //
+  //   var response = await RequestAssistant.getRequest(url);
+  //
+  //   if (response != "failed") {
+  //     //placeAddress=response["results"][0]["formatted_address"];
+  //     st1 = response["results"][0]["address_components"][3]["long_name"];
+  //     st2 = response["results"][0]["address_components"][4]["long_name"];
+  //     st3 = response["results"][0]["address_components"][5]["long_name"];
+  //     st4 = response["results"][0]["address_components"][6]["long_name"];
+  //     placeAddress = st1 + ", " + st2 + ", " + st3 + ", " + st4;
+  //
+  //     Address address =
+  //         Address("", placeAddress, "", position.latitude, position.longitude);
+  //     Provider.of<AppData>(context, listen: false)
+  //         .updatePickupLocationAddress(address);
+  //   }
+  //
+  //   return placeAddress;
+  // }
 
   static Future<DirectionDetails?> obtainDirectionsDetails(
       LatLng initialPosition, LatLng finalPosition) async {
@@ -81,29 +82,39 @@ class AssistantMethods {
     return totalLocalAmount.truncate();
   }
 
-  static void getCurrentOnlineUserInfo() async {
-    firebaseUser = await FirebaseAuth.instance.currentUser;
-    String? userId = firebaseUser?.uid;
-
-    //print(userId);
-    DatabaseReference reference =
-        FirebaseDatabase.instance.ref().child("users").child(userId!);
-    //print(reference);
-    reference.get().then(
-      (DataSnapshot dataSnapshot) {
-        print(dataSnapshot.value);
-        if (dataSnapshot.value != null) {
-          usersCurrentInfo = Users.fromSnapshot(dataSnapshot);
-          print(usersCurrentInfo?.phone);
-        }
-      },
-    );
-    // reference.once().then((DataSnapshot dataSnapshot){
-    //   if(dataSnapshot.value!=null){
-    //     print("*****************************************************************************************");
-    //     print(dataSnapshot.value);
-    //     usersCurrentInfo=Users.fromSnapshot(dataSnapshot);
-    //   }
-    // });
+  // static void getCurrentOnlineUserInfo() async {
+  //   firebaseUser = await FirebaseAuth.instance.currentUser;
+  //   String? userId = firebaseUser?.uid;
+  //
+  //   //print(userId);
+  //   DatabaseReference reference =
+  //       FirebaseDatabase.instance.ref().child("users").child(userId!);
+  //   //print(reference);
+  //   reference.get().then(
+  //     (DataSnapshot dataSnapshot) {
+  //       print(dataSnapshot.value);
+  //       if (dataSnapshot.value != null) {
+  //         usersCurrentInfo = Users.fromSnapshot(dataSnapshot);
+  //         print(usersCurrentInfo?.phone);
+  //       }
+  //     },
+  //   );
+  //   // reference.once().then((DataSnapshot dataSnapshot){
+  //   //   if(dataSnapshot.value!=null){
+  //   //     print("*****************************************************************************************");
+  //   //     print(dataSnapshot.value);
+  //   //     usersCurrentInfo=Users.fromSnapshot(dataSnapshot);
+  //   //   }
+  //   // });
+  // }
+  static void diableHomeTabLiveLocationUpdates(){
+    hometabPageStreamSubscription?.pause();
+    Geofire.removeLocation(currentFirebaseUser!.uid);
   }
+
+  static void enableHomeTabLiveLocationUpdates(){
+    hometabPageStreamSubscription?.resume();
+    Geofire.setLocation(currentFirebaseUser!.uid, currentPosition!.latitude, currentPosition!.longitude);
+  }
+
 }
